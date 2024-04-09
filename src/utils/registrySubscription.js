@@ -8,7 +8,7 @@ module.exports = {
             const response = await axios({
                 method: "POST",
                 baseURL: `http://${process.env.GATEWAY_HOST}:${process.env.GATEWAY_PORT}`,
-                url: `/registry/statistics`,
+                url: `/registry/services`,
                 data: {
                     serviceIdentifier: "statistics-service",
                     serviceLabel: "Service Statistique",
@@ -16,9 +16,11 @@ module.exports = {
                     port: process.env.PORT,
                     entrypointUrl: "/api/statistics",
                     redirectUrl: "/api/statistics",
-                    // routeProtections: [
-
-                    // ]
+                    routeProtections: [
+                        { methods: ["GET"], route: "/orders", roles: ["admin", "salesman"] },
+                        { methods: ["GET"], route: "/orders/count", roles: ["admin", "salesman"] },
+                        { methods: ["GET"], route: "/orders/ongoing-income", roles: ["admin", "salesman"] }
+                    ]
                 }
             });
         } catch (error) {
