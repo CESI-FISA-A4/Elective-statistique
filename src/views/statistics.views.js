@@ -14,11 +14,14 @@ const errors = {
   })(),
 }
 module.exports = {
+  ping: async (req, res) => {
+    return;
+  },
   getOrdersStats: async (req, res) => {
     const allOrders = await Order.find().populate("status");
     let stats = {}
     stats["total"] = 0
-    allOrders.map((order)=>{
+    allOrders.map((order) => {
       let curState = ""
       if (!order?.status?.state) return;
       curState = order.status.state;
@@ -34,19 +37,19 @@ module.exports = {
     const { status } = req.query;
     const filter = {};
     if (status) {
-      const targetStatus = await Status.findOne({state: {$eq: status}});
+      const targetStatus = await Status.findOne({ state: { $eq: status } });
       if (!targetStatus) return errors.statusNotFound;
-      filter["status"] = {$eq: targetStatus._id}
+      filter["status"] = { $eq: targetStatus._id }
     }
     const targetOrders = await Order.find(filter).populate("articleList.article").populate("restaurantId");
     const allRestaurants = await Restaurant.find();
     const ordersRecap = []
-    targetOrders.map((order)=>{
+    targetOrders.map((order) => {
       let totalPrice = 0;
-      order.articleList.map((selectedArticle)=>{
+      order.articleList.map((selectedArticle) => {
         totalPrice += selectedArticle?.article?.price * selectedArticle.quantity;
       });
-      const index = allRestaurants.findIndex(((restaurant)=>{
+      const index = allRestaurants.findIndex(((restaurant) => {
         return restaurant._id.equals(order.restaurantId)
       }))
       console.log(index);
@@ -59,18 +62,18 @@ module.exports = {
     return ordersRecap;
   },
   getOngoingIncome: async (req, res) => {
-    const statusToExclude = await Status.find({state : {$in: ["aborted","delivered"]}});
+    const statusToExclude = await Status.find({ state: { $in: ["aborted", "delivered"] } });
     const statusListToExclude = [];
-    statusToExclude.map((status)=>{
+    statusToExclude.map((status) => {
       statusListToExclude.push(status._id);
     });
-    const ongoingOrders = await Order.find({status: {$nin: statusListToExclude}}).populate("articleList.article");
+    const ongoingOrders = await Order.find({ status: { $nin: statusListToExclude } }).populate("articleList.article");
     let ongoingIncome = 0;
-    ongoingOrders.map((order)=>{
-      order.articleList.map((selectedArticle)=>{
+    ongoingOrders.map((order) => {
+      order.articleList.map((selectedArticle) => {
         ongoingIncome += selectedArticle?.article?.price * selectedArticle.quantity;
       });
     });
-    return {ongoingIncome};
+    return { ongoingIncome };
   }
 }
