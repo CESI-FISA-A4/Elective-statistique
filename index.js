@@ -10,7 +10,7 @@ const HOST = process.env.HOST;
 
 initDatabase();
 setupSwagger(fastify);
-// subscribeToApiGateway();
+subscribeToApiGateway();
 
 fastify.register( statsRoutes, { prefix: "/api/statistics" });
 
