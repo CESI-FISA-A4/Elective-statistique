@@ -1,5 +1,22 @@
 {
+  "name": "elective-statistics",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "nodemon index.js dotenv_config_path=./.env.development",
+    "start": "node -r dotenv/config index.js dotenv_config_path=./.env.production",
+    "start:dev": "node -r dotenv/config index.js dotenv_config_path=./.env.development"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "fastify": "^4.26.2"
+    "@fastify/swagger": "^8.14.0",
+    "@fastify/swagger-ui": "^3.0.0",
+    "axios": "^1.6.8",
+    "dotenv": "^16.4.5",
+    "fastify": "^4.26.2",
+    "mongoose": "^8.2.3"
   }
 }
