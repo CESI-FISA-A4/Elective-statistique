@@ -7,27 +7,38 @@ const { Status } = require("../models/status.model");
 const { Restaurant } = require("../models/restaurant.model");
 
 const errors = {
+  statusNotFound: (() => {
+    const err = Error("Specified status does not exists");
+    err.statusCode = 400;
+    return err;
+  })(),
 }
 module.exports = {
   getOrdersStats: async (req, res) => {
     const allOrders = await Order.find().populate("status");
     let stats = {}
-    let curState = ""
+    stats["total"] = 0
     allOrders.map((order)=>{
+      let curState = ""
       if (!order?.status?.state) return;
       curState = order.status.state;
       if (curState && !(curState in stats)) {
         stats[curState] = 0
       };
       if (curState) stats[curState] += 1;
+      if (curState) stats["total"] += 1;
     });
     return stats;
   },
   getOrdersFromStatus: async (req, res) => {
     const { status } = req.query;
-    const targetStatus = await Status.findOne({state: {$eq: status}});
-    if (!targetStatus) return errors.statusNotFound;
-    const targetOrders = await Order.find({status: {$eq: targetStatus._id}}).populate("articleList.article").populate("restaurantId");
+    const filter = {};
+    if (status) {
+      const targetStatus = await Status.findOne({state: {$eq: status}});
+      if (!targetStatus) return errors.statusNotFound;
+      filter["status"] = {$eq: targetStatus._id}
+    }
+    const targetOrders = await Order.find(filter).populate("articleList.article").populate("restaurantId");
     const allRestaurants = await Restaurant.find();
     const ordersRecap = []
     targetOrders.map((order)=>{
@@ -39,7 +50,6 @@ module.exports = {
         return restaurant._id.equals(order.restaurantId)
       }))
       console.log(index);
-      // const targetRestaurant = await Restaurant.findById(order.restaurantId);
       ordersRecap.push({
         orderId: order._id,
         totalPrice: totalPrice,
@@ -47,12 +57,6 @@ module.exports = {
       });
     });
     return ordersRecap;
-    // Get all orders where statusId = req.query.statusId
-    // Get all articles
-    // Join article prix on articleId
-    // sum(articlePrix*quant) par order
-    // Get Restaurant on restaurantId
-    // return RestaurantId,RestaurantName,OrderId,PrixTotal
   },
   getOngoingIncome: async (req, res) => {
     const statusToExclude = await Status.find({state : {$in: ["aborted","delivered"]}});
@@ -68,12 +72,5 @@ module.exports = {
       });
     });
     return {ongoingIncome};
-    // Get statusId where State = "finished"
-    // Get all orders where statusId != state finished
-    // Get all articles
-    // Join article prix on articleId
-    // sum(articlePrix*quant) par order
-    // sum(orderPrixTotal)
-    // return ValeurTotal
   }
 }

@@ -12,7 +12,7 @@ initDatabase();
 setupSwagger(fastify);
 // subscribeToApiGateway();
 
-fastify.register( statsRoutes, { prefix: "/api/orders" });
+fastify.register( statsRoutes, { prefix: "/api/statistics" });
 
 fastify.listen({ port: PORT, host: HOST }, (err) => {
   if (err) {
