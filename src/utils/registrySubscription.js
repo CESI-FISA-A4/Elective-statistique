@@ -19,7 +19,8 @@ module.exports = {
                     routeProtections: [
                         { methods: ["GET"], route: "/orders", roles: ["admin", "salesman"] },
                         { methods: ["GET"], route: "/orders/count", roles: ["admin", "salesman"] },
-                        { methods: ["GET"], route: "/orders/ongoing-income", roles: ["admin", "salesman"] }
+                        { methods: ["GET"], route: "/orders/ongoing-income", roles: ["admin", "salesman"] },
+                        { methods: ["GET"], route: "/orders/restaurant/:id", roles: ["restaurantOwner", "admin"] }
                     ]
                 }
             });
