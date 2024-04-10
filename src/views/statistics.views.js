@@ -84,10 +84,11 @@ module.exports = {
   getRestaurantStats: async (req,res)=>{
     const { id } = req.params;
     if (!isValidObjectId(id)) return errors.invalidId;
-    const ordersOfRestaurant = await Order.find({restaurantId: {$eq: id}}).populate("articleList.article");
+    const ordersOfRestaurant = await Order.find({restaurantId: {$eq: id}}).populate('status').populate("articleList.article");
     let count = 0;
     let totalPrice = 0;
     ordersOfRestaurant.map((order)=>{
+      if(order?.status?.state=="aborted") return;
       count ++;
       order.articleList.map((selectedArticle) => {
         if (!selectedArticle?.article?.price) return;
