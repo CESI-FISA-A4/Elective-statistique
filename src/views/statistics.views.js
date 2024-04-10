@@ -12,6 +12,11 @@ const errors = {
     err.statusCode = 400;
     return err;
   })(),
+  invalidId: (() => {
+    const err = Error("Invalid Id format");
+    err.statusCode = 400;
+    return err;
+  })(),
 }
 module.exports = {
   ping: async (req, res) => {
@@ -75,5 +80,22 @@ module.exports = {
       });
     });
     return { ongoingIncome };
+  },
+  getRestaurantStats: async (req,res)=>{
+    const { id } = req.params;
+    if (!isValidObjectId(id)) return errors.invalidId;
+    const ordersOfRestaurant = await Order.find({restaurantId: {$eq: id}}).populate('status').populate("articleList.article");
+    let count = 0;
+    let totalPrice = 0;
+    ordersOfRestaurant.map((order)=>{
+      if(order?.status?.state=="aborted") return;
+      count ++;
+      order.articleList.map((selectedArticle) => {
+        if (!selectedArticle?.article?.price) return;
+        totalPrice += selectedArticle?.article?.price * selectedArticle.quantity;
+      });
+    });
+    const averagePrice = totalPrice/count;
+    return { count, totalPrice, averagePrice}
   }
 }
